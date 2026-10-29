@@ -15,14 +15,32 @@ export default function Chat({ route, navigation }) {
   const [text, setText] = useState('');
   const [typing, setTyping] = useState(false);
   const [sec, setSec] = useState(0);
+  const [ended, setEnded] = useState(false);
+  const [ending, setEnding] = useState(false);
   const list = useRef(null);
+  const sessionIdRef = useRef(null);
+  const endedRef = useRef(false);
 
   useEffect(() => {
-    let sid;
+    let active = true;
     api('/sessions', { method: 'POST', body: { therapist_id: id } })
-      .then(s => { sid = s.id; setSession(s); setMsgs([{ id: 'h', me: false, body: s.hello }]); })
-      .catch(e => { Alert.alert('Cannot start chat', e.message); navigation.goBack(); });
-    return () => { if (sid) api(`/sessions/${sid}/end`, { method: 'POST' }).then(r => setWallet(r.wallet_cents)).catch(() => {}); };
+      .then(s => {
+        if (!active) {
+          api(`/sessions/${s.id}/end`, { method: 'POST' }).catch(() => {});
+          return;
+        }
+        sessionIdRef.current = s.id;
+        setSession(s);
+        setMsgs([{ id: 'h', me: false, body: s.hello }]);
+      })
+      .catch(e => { if (active) { Alert.alert('Cannot start chat', e.message); navigation.goBack(); } });
+    return () => {
+      active = false;
+      if (sessionIdRef.current && !endedRef.current) {
+        endedRef.current = true;
+        api(`/sessions/${sessionIdRef.current}/end`, { method: 'POST' }).then(r => setWallet(r.wallet_cents)).catch(() => {});
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]); // start exactly one session per screen visit
 
@@ -30,7 +48,7 @@ export default function Chat({ route, navigation }) {
 
   async function send(body) {
     body = (body ?? text).trim();
-    if (!body || typing) return;
+    if (!body || typing || !session || ended) return;
     setText(''); setTyping(true);
     setMsgs(m => [...m, { id: 'u' + Date.now(), me: true, body }]);
     try {
@@ -40,12 +58,48 @@ export default function Chat({ route, navigation }) {
     } catch (e) { Alert.alert('Session', e.message); if (e.status === 402) navigation.goBack(); }
     setTyping(false);
   }
+
+  async function endSession() {
+    if (!session || ending || ended) return;
+    setEnding(true);
+    endedRef.current = true;
+    try {
+      const result = await api(`/sessions/${session.id}/end`, { method: 'POST' });
+      setEnded(true);
+      setWallet(result.wallet_cents);
+    } catch (e) {
+      endedRef.current = false;
+      Alert.alert('Could not end conversation', e.message);
+    } finally {
+      setEnding(false);
+    }
+  }
+
   const free = sec < 180;
+  if (ended) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: space.xl }}>
+        <Text style={{ fontSize: 44 }}>🌿</Text>
+        <Text style={{ ...type.h1, color: colors.ink, textAlign: 'center', marginTop: space.md }}>Thank you for showing up.</Text>
+        <Text style={{ color: colors.muted, textAlign: 'center', marginTop: space.sm }}>Take a moment to note what you want to carry with you from this conversation.</Text>
+        <Pressable onPress={() => navigation.navigate('Tabs', { screen: 'Reflections', params: { sessionId: session.id, therapistId: id } })} style={{ marginTop: space.lg, padding: 14, paddingHorizontal: 22, borderRadius: radius.pill, backgroundColor: colors.green }}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>Write a reflection</Text>
+        </Pressable>
+        <Pressable onPress={() => navigation.navigate('Tabs', { screen: 'Home' })} style={{ marginTop: space.md, padding: 10 }}>
+          <Text style={{ color: colors.green, fontWeight: '700' }}>Back to Dialogue</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
-      <Text style={{ textAlign: 'center', padding: space.sm, ...type.small, color: colors.muted }}>
-        {mmss(sec)} · {free ? 'First 3 minutes are free' : `${money(session?.per_min_cents || 0)}/min`} · Balance {money(user.wallet_cents)}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: space.sm, gap: space.md }}>
+        <Text style={{ ...type.small, color: colors.muted }}>{mmss(sec)} · {free ? 'First 3 minutes are free' : `${money(session?.per_min_cents || 0)}/min`} · Balance {money(user.wallet_cents)}</Text>
+        <Pressable onPress={endSession} disabled={ending || !session} style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: radius.pill, backgroundColor: colors.category }}>
+          <Text style={{ color: colors.green, fontWeight: '700', fontSize: 12 }}>{ending ? 'Ending…' : 'End'}</Text>
+        </Pressable>
+      </View>
       <FlatList ref={list} data={msgs} keyExtractor={m => m.id} contentContainerStyle={{ padding: space.md, gap: space.sm }}
         onContentSizeChange={() => list.current?.scrollToEnd({ animated: true })}
         renderItem={({ item }) => (

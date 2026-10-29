@@ -13,9 +13,9 @@ export default function Wallet() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, padding: space.md, gap: space.md }}>
       <View style={{ backgroundColor: colors.night, borderRadius: radius.md, padding: space.lg }}>
-        <Text style={{ color: '#B8C0D9' }}>Balance</Text>
+        <Text style={{ color: colors.onDarkMuted }}>Balance</Text>
         <Text style={{ color: '#fff', fontSize: 36, fontWeight: '700' }}>{money(user.wallet_cents)}</Text>
-        <Text style={{ color: '#B8C0D9', marginTop: space.xs }}>{user.name} · {user.email}</Text>
+        <Text style={{ color: colors.onDarkMuted, marginTop: space.xs }}>{user.name} · {user.email}</Text>
       </View>
       <Text style={type.h2}>Add money (demo)</Text>
       <View style={{ flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' }}>

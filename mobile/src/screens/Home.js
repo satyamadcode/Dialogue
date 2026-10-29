@@ -6,6 +6,7 @@ import { colors, radius, space, type } from '../theme';
 
 const CATS = [['All', '✨'], ['Career', '💼'], ['Stress', '🌧️'], ['Relationships', '💞'], ['Life', '🌱'], ['Confidence', '💪'], ['Grief', '🕊️']];
 const SCENE_MS = 5000;
+const TOPIC_CATEGORY = { career: 'Career', stress: 'Stress', relationships: 'Relationships', life: 'Life' };
 
 function Explainer({ data, question }) {
   const [i, setI] = useState(0);
@@ -45,13 +46,14 @@ function Explainer({ data, question }) {
 function GuideCard({ t, onPress }) {
   return (
     <Pressable onPress={onPress} style={{ backgroundColor: colors.card, marginHorizontal: space.md, marginBottom: space.md, borderRadius: radius.md, padding: space.md, flexDirection: 'row', gap: space.md, borderWidth: 1, borderColor: colors.line }}>
-      <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: t.color, borderWidth: 3, borderColor: colors.brand, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: colors.avatarPalette[t.id % colors.avatarPalette.length], borderWidth: 3, borderColor: colors.brand, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ color: '#fff', fontWeight: '700', fontSize: 18 }}>{t.name.replace('Dr. ', '').split(' ').map(w => w[0]).join('')}</Text>
-        <View style={{ position: 'absolute', right: -2, bottom: -2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#fff', backgroundColor: t.online ? colors.green : '#E0A030' }} />
+        <View style={{ position: 'absolute', right: -2, bottom: -2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#fff', backgroundColor: t.online ? colors.green : colors.offline }} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={type.h2}>{t.name}</Text>
         <Text style={{ ...type.small, color: colors.muted }}>{t.role} · {t.tags}</Text>
+        <Text style={{ ...type.small, color: colors.ink, marginTop: 4 }} numberOfLines={2}>{t.bio}</Text>
         <Text style={{ ...type.small, color: colors.muted }}>Exp {t.exp_years} yrs · ★ {t.rating} · {t.online ? 'Online' : 'Busy'}</Text>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
@@ -77,7 +79,11 @@ export default function Home({ navigation }) {
 
   async function ask() {
     if (!q.trim()) return;
-    try { setVideo({ ...(await api('/explainer?q=' + encodeURIComponent(q))), question: q.trim(), key: Date.now() }); } catch (e) { Alert.alert('Error', e.message); }
+    try {
+      const result = await api('/explainer?q=' + encodeURIComponent(q));
+      setCat(TOPIC_CATEGORY[result.topic] || 'All');
+      setVideo({ ...result, question: q.trim(), key: Date.now() });
+    } catch (e) { Alert.alert('Error', e.message); }
   }
   const shown = list.filter(t => cat === 'All' || (t.tags + t.role).toLowerCase().includes(cat.toLowerCase()));
 
@@ -89,24 +95,24 @@ export default function Home({ navigation }) {
       ListHeaderComponent={<View>
         <View style={{ padding: space.md }}>
           <Text style={type.h1}>Hi {user.name.split(' ')[0]} 👋</Text>
-          <Text style={{ color: colors.muted, marginVertical: space.sm }}>What would you like to talk about today?</Text>
+          <Text style={{ color: colors.muted, marginVertical: space.sm }}>What would feel good to talk through today?</Text>
           <View style={{ flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.pill, padding: 6, borderWidth: 1, borderColor: colors.line }}>
-            <TextInput style={{ flex: 1, paddingHorizontal: space.md, color: colors.ink }} placeholder="e.g. I’m unhappy at my job" placeholderTextColor={colors.muted} value={q} onChangeText={setQ} onSubmitEditing={ask} returnKeyType="search" />
-            <Pressable onPress={ask} style={{ backgroundColor: colors.brand, borderRadius: radius.pill, paddingHorizontal: 18, justifyContent: 'center' }}><Text style={{ fontWeight: '700' }}>Show me</Text></Pressable>
+            <TextInput style={{ flex: 1, paddingHorizontal: space.md, color: colors.ink }} placeholder="Tell us what’s on your mind..." placeholderTextColor={colors.muted} value={q} onChangeText={setQ} onSubmitEditing={ask} returnKeyType="search" />
+            <Pressable onPress={ask} style={{ backgroundColor: colors.brand, borderRadius: radius.pill, paddingHorizontal: 18, justifyContent: 'center' }}><Text style={{ fontWeight: '700' }}>Explore this feeling</Text></Pressable>
           </View>
         </View>
         {video && <Explainer key={video.key} data={video} question={video.question} />}
         <FlatList horizontal data={CATS} keyExtractor={c => c[0]} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.md, gap: space.md, paddingVertical: space.sm }}
           renderItem={({ item: [c, icon] }) => (
             <Pressable onPress={() => setCat(c)} style={{ alignItems: 'center', width: 68 }}>
-              <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: '#FFF3C4', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: cat === c ? colors.brandDeep : 'transparent' }}><Text style={{ fontSize: 24 }}>{icon}</Text></View>
+              <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: colors.category, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: cat === c ? colors.brandDeep : 'transparent' }}><Text style={{ fontSize: 24 }}>{icon}</Text></View>
               <Text style={{ ...type.small, marginTop: 4 }}>{c}</Text>
             </Pressable>)} />
         <View style={{ margin: space.md, padding: space.lg, borderRadius: radius.md, backgroundColor: colors.night }}>
-          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>First 3 minutes free</Text>
-          <Text style={{ color: '#B8C0D9' }}>With every guide you chat with</Text>
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>You don’t have to sort it out alone.</Text>
+          <Text style={{ color: colors.onDarkMuted }}>Find a therapist or life coach to talk through your next step.</Text>
         </View>
-        <Text style={{ ...type.h2, paddingHorizontal: space.md, paddingBottom: space.sm }}>Guides</Text>
+        <Text style={{ ...type.h2, paddingHorizontal: space.md, paddingBottom: space.sm }}>{video ? `People who understand ${video.topic}` : 'People here to listen'}</Text>
       </View>}
     />
   );

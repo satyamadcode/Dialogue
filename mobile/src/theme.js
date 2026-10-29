@@ -1,7 +1,9 @@
-// Cool, light surfaces (no beige). Yellow-orange brand like a consultation marketplace.
+// Soft sage surfaces and forest-green accents keep the interface calm and welcoming.
 export const colors = {
-  bg: '#F2F5FB', card: '#FFFFFF', ink: '#14171F', muted: '#667085', line: '#E4E8F0',
-  brand: '#FDC500', brandDeep: '#FF9F1C', green: '#1F9D55', danger: '#D92D20', night: '#1C2340',
+  bg: '#F3F7F1', card: '#FFFFFF', ink: '#26372D', muted: '#6E7D72', line: '#E1E9E0',
+  brand: '#C6DCC4', brandDeep: '#527A5A', green: '#477B55', danger: '#B9534B', night: '#29483A',
+  category: '#E7F0E4', avatarPalette: ['#527A5A', '#62866A', '#3F6B51', '#708F72', '#486C54'],
+  onDarkMuted: '#D0DED2', offline: '#A8844D',
 };
 export const space = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
 export const radius = { md: 14, pill: 999 };

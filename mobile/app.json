@@ -1,1 +1,20 @@
-{"expo":{"name":"Dialogue","slug":"dialogue","version":"1.0.0","orientation":"portrait","userInterfaceStyle":"light","ios":{"supportsTablet":false,"bundleIdentifier":"com.dialogue.app"},"android":{"package":"com.dialogue.app"},"plugins":["expo-secure-store"]}}
+{
+  "expo": {
+    "name": "Dialogue",
+    "slug": "dialogue",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.dialogue.app"
+    },
+    "android": {
+      "package": "com.dialogue.app"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-status-bar"
+    ]
+  }
+}

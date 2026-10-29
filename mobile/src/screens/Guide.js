@@ -24,15 +24,21 @@ export default function Guide({ route, navigation }) {
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.md, gap: space.md }}>
       <View style={card}>
-        <Text style={type.h2}>{t.name}</Text>
-        <Text style={{ color: colors.muted }}>{t.role} · {money(t.rate_cents_per_hr)}/hr · ★ {t.rating}</Text>
-        <Text style={{ marginTop: space.sm }}>{t.bio}</Text>
+        <Text style={{ ...type.h1, color: colors.ink }}>{t.name}</Text>
+        <Text style={{ color: colors.muted, marginTop: 4 }}>{t.role} · {t.exp_years} years · ★ {t.rating}</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.xs, marginTop: space.md }}>
+          {t.tags.split(',').map(tag => <Text key={tag} style={{ color: colors.green, backgroundColor: colors.category, paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.pill, fontSize: 12 }}>{tag.trim()}</Text>)}
+        </View>
+        <Text style={{ ...type.h2, marginTop: space.lg }}>A little about {t.name.split(' ')[0]}</Text>
+        <Text style={{ color: colors.ink, lineHeight: 23, marginTop: space.xs }}>{t.full_bio || t.bio}</Text>
+        <Text style={{ color: colors.muted, marginTop: space.md }}>{money(t.rate_cents_per_hr)}/hour · {t.online ? 'Available to talk now' : 'Currently in a session'}</Text>
         <Pressable disabled={!t.online} onPress={() => navigation.navigate('Chat', { id, name })} style={{ marginTop: space.md, padding: 14, borderRadius: radius.pill, alignItems: 'center', backgroundColor: t.online ? colors.green : colors.line }}>
-          <Text style={{ color: t.online ? '#fff' : colors.muted, fontWeight: '700' }}>{t.online ? '💬 Chat now · 3 min free' : 'Busy right now, schedule below'}</Text>
+          <Text style={{ color: t.online ? '#fff' : colors.muted, fontWeight: '700' }}>{t.online ? '💬 Start a conversation' : 'Booked up right now — schedule below'}</Text>
         </Pressable>
       </View>
       <View style={card}>
-        <Text style={type.h2}>Schedule a consultation</Text>
+        <Text style={type.h2}>Book a check-in</Text>
+        <Text style={{ color: colors.muted, marginTop: 4 }}>Choose a time that works for you. You can review it in Sessions.</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginVertical: space.sm }}>
           {t.slots.map(s => (
             <Pressable key={s} onPress={() => setSlot(s)} style={{ paddingVertical: 8, paddingHorizontal: 16, borderRadius: radius.pill, borderWidth: 1, borderColor: slot === s ? colors.brand : colors.line, backgroundColor: slot === s ? colors.brand : colors.card }}>
