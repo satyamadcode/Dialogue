@@ -208,15 +208,31 @@ app.post('/api/wallet/topup', ah((req, res) => {
 }));
 
 app.get('/api/bookings', (req, res) => res.json(db.prepare(
-  `SELECT b.id,b.slot,b.resources,t.id therapist_id,t.name therapist_name,t.role FROM bookings b JOIN therapists t ON t.id=b.therapist_id WHERE b.user_id=? ORDER BY b.id DESC`
+  `SELECT b.id,b.slot,b.resources,b.session_type,b.duration_minutes,b.price_cents,t.id therapist_id,t.name therapist_name,t.role FROM bookings b JOIN therapists t ON t.id=b.therapist_id WHERE b.user_id=? ORDER BY b.id DESC`
 ).all(req.user.id).map(b => ({ ...b, resources: JSON.parse(b.resources) }))));
 
 app.post('/api/bookings', ah((req, res) => {
-  const { therapist_id, slot, resources = [] } = req.body || {};
+  const { therapist_id, slot, resources = [], session_type = 'alignment' } = req.body || {};
   const t = db.prepare('SELECT * FROM therapists WHERE id=?').get(therapist_id);
-  if (!t || !JSON.parse(t.slots).includes(slot)) return res.status(400).json({ error: 'Invalid guide or time' });
+  const services = { clarity: 30, alignment: 60 };
+  const duration = services[session_type];
+  if (!t || !duration || !Array.isArray(resources) || typeof slot !== 'string')
+    return res.status(400).json({ error: 'Choose a valid guide, session and time' });
+  const recurringSlots = JSON.parse(t.slots);
+  const datedSlot = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/.exec(slot);
+  if (datedSlot) {
+    const [, date, time] = datedSlot;
+    const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(`${date}T00:00:00Z`).getUTCDay()];
+    const today = new Date().toISOString().slice(0, 10);
+    if (!validDate(date) || date < today || !recurringSlots.includes(`${day} ${time}`))
+      return res.status(400).json({ error: 'That date or time is not available' });
+  } else if (!recurringSlots.includes(slot)) {
+    return res.status(400).json({ error: 'Invalid guide or time' });
+  }
   if (db.prepare('SELECT 1 FROM bookings WHERE therapist_id=? AND slot=?').get(t.id, slot)) return res.status(409).json({ error: 'That time was just taken' });
-  const id = db.prepare('INSERT INTO bookings(user_id,therapist_id,slot,resources) VALUES(?,?,?,?)').run(req.user.id, t.id, slot, JSON.stringify(resources)).lastInsertRowid;
+  const price = Math.ceil(t.rate_cents_per_hr * duration / 60);
+  const id = db.prepare('INSERT INTO bookings(user_id,therapist_id,slot,resources,session_type,duration_minutes,price_cents) VALUES(?,?,?,?,?,?,?)')
+    .run(req.user.id, t.id, slot, JSON.stringify(resources), session_type, duration, price).lastInsertRowid;
   res.status(201).json({ id });
 }));
 app.delete('/api/bookings/:id', (req, res) => { db.prepare('DELETE FROM bookings WHERE id=? AND user_id=?').run(req.params.id, req.user.id); res.json({ ok: true }); });

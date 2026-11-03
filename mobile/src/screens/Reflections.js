@@ -3,7 +3,7 @@ import { Alert, FlatList, Pressable, Switch, Text, TextInput, View } from 'react
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, screen, space, type } from '../theme';
 
 const today = () => {
   const date = new Date();
@@ -41,11 +41,11 @@ export default function Reflections({ route }) {
   useEffect(() => {
     if (route.params?.therapistId) {
       setGuideId(String(route.params.therapistId));
-      setShare(true);
+      setShare(false);
     }
     if (route.params?.sessionId) {
       setTab('journal');
-      setShare(true);
+      setShare(false);
     }
   }, [route.params?.sessionId, route.params?.therapistId]);
 
@@ -86,7 +86,7 @@ export default function Reflections({ route }) {
   const isJournal = tab === 'journal';
   return (
     <FlatList
-      style={{ backgroundColor: colors.bg }}
+      style={{ ...screen, backgroundColor: colors.bg }}
       contentContainerStyle={{ padding: space.md, gap: space.md }}
       data={items}
       keyExtractor={entry => String(entry.id)}
@@ -118,7 +118,7 @@ export default function Reflections({ route }) {
                 <Text style={{ ...type.small, color: colors.muted, marginTop: space.md }}>Share with a therapist or coach</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm }}>
                   {guides.map(guide => (
-                    <Pressable key={guide.id} onPress={() => { setGuideId(String(guide.id)); setShare(true); }} style={{ paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.pill, borderWidth: 1, borderColor: guideId === String(guide.id) ? colors.brandDeep : colors.line, backgroundColor: guideId === String(guide.id) ? colors.category : colors.card }}>
+                    <Pressable key={guide.id} onPress={() => setGuideId(String(guide.id))} style={{ paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.pill, borderWidth: 1, borderColor: guideId === String(guide.id) ? colors.brandDeep : colors.line, backgroundColor: guideId === String(guide.id) ? colors.category : colors.card }}>
                       <Text style={{ color: colors.ink, fontSize: 12 }}>{guide.name}</Text>
                     </Pressable>
                   ))}
@@ -127,6 +127,7 @@ export default function Reflections({ route }) {
                   <Text style={{ ...type.small, color: colors.ink }}>Let them read this reflection</Text>
                   <Switch value={share} onValueChange={setShare} trackColor={{ true: colors.brandDeep }} />
                 </View> : null}
+                <Text style={{ ...type.small, color: colors.muted, marginTop: space.xs }}>Private to you unless you choose to share it.</Text>
                 {sessionId ? <Text style={{ ...type.small, color: colors.green, marginTop: space.xs }}>This note will be linked to your conversation.</Text> : null}
               </>
             ) : null}

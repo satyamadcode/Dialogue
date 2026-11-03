@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Animated, FlatList, Pressable, RefreshControl, Text, TextInput, View } from 'react-native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, screen, space, type } from '../theme';
 
 const CATS = [['All', '✨'], ['Career', '💼'], ['Stress', '🌧️'], ['Relationships', '💞'], ['Life', '🌱'], ['Confidence', '💪'], ['Grief', '🕊️']];
 const SCENE_MS = 5000;
@@ -45,20 +45,27 @@ function Explainer({ data, question }) {
 
 function GuideCard({ t, onPress }) {
   return (
-    <Pressable onPress={onPress} style={{ backgroundColor: colors.card, marginHorizontal: space.md, marginBottom: space.md, borderRadius: radius.md, padding: space.md, flexDirection: 'row', gap: space.md, borderWidth: 1, borderColor: colors.line }}>
-      <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: colors.avatarPalette[t.id % colors.avatarPalette.length], borderWidth: 3, borderColor: colors.brand, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 18 }}>{t.name.replace('Dr. ', '').split(' ').map(w => w[0]).join('')}</Text>
-        <View style={{ position: 'absolute', right: -2, bottom: -2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#fff', backgroundColor: t.online ? colors.green : colors.offline }} />
+    <Pressable accessibilityRole="button" onPress={onPress} style={{ backgroundColor: colors.card, marginHorizontal: space.md, marginBottom: space.sm + 4, borderRadius: radius.md, padding: space.md, borderWidth: 1, borderColor: colors.line }}>
+      <View style={{ flexDirection: 'row', gap: space.md }}>
+        <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: colors.avatarPalette[t.id % colors.avatarPalette.length], alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{t.name.replace('Dr. ', '').split(' ').map(w => w[0]).join('')}</Text>
+          <View style={{ position: 'absolute', right: 0, bottom: 0, width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: '#fff', backgroundColor: t.online ? colors.green : colors.offline }} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={type.h2}>{t.name}</Text>
+          <Text style={{ ...type.small, color: colors.muted, marginTop: 2 }}>{t.role} · {t.exp_years} years</Text>
+          <Text style={{ ...type.small, color: colors.ink, marginTop: 6 }} numberOfLines={2}>{t.bio}</Text>
+        </View>
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={type.h2}>{t.name}</Text>
-        <Text style={{ ...type.small, color: colors.muted }}>{t.role} · {t.tags}</Text>
-        <Text style={{ ...type.small, color: colors.ink, marginTop: 4 }} numberOfLines={2}>{t.bio}</Text>
-        <Text style={{ ...type.small, color: colors.muted }}>Exp {t.exp_years} yrs · ★ {t.rating} · {t.online ? 'Online' : 'Busy'}</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.xs, marginTop: space.sm }}>
+        {t.tags.split(',').slice(0, 3).map(tag => <Text key={tag} style={{ ...type.small, color: colors.green, backgroundColor: colors.category, paddingHorizontal: 9, paddingVertical: 4, borderRadius: radius.pill }}>{tag.trim()}</Text>)}
       </View>
-      <View style={{ alignItems: 'flex-end' }}>
-        <Text style={{ ...type.small, color: colors.muted, textDecorationLine: 'line-through' }}>${(t.per_min_cents / 100).toFixed(2)}/min</Text>
-        <Text style={{ ...type.small, color: colors.green, fontWeight: '700' }}>3 min FREE</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderColor: colors.line, marginTop: space.sm, paddingTop: space.sm }}>
+        <View>
+          <Text style={{ ...type.small, color: colors.muted }}>★ {t.rating}  ·  {t.online ? 'Available now' : 'In a conversation'}</Text>
+          <Text style={{ ...type.small, color: colors.green, fontWeight: '600', marginTop: 3 }}>${(t.per_min_cents / 100).toFixed(2)}/min · first 3 min free</Text>
+        </View>
+        <Text style={{ ...type.small, color: colors.green, fontWeight: '700' }}>View profile  ›</Text>
       </View>
     </Pressable>
   );
@@ -89,30 +96,39 @@ export default function Home({ navigation }) {
 
   return (
     <FlatList
-      data={shown} keyExtractor={t => String(t.id)} style={{ backgroundColor: colors.bg }}
+      data={shown} keyExtractor={t => String(t.id)} style={{ ...screen, backgroundColor: colors.bg }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
       renderItem={({ item }) => <GuideCard t={item} onPress={() => navigation.getParent().navigate('Guide', { id: item.id, name: item.name })} />}
+      ListEmptyComponent={<View style={{ alignItems: 'center', padding: space.xl }}><Text style={{ ...type.h2 }}>No guides in this topic yet</Text><Text style={{ color: colors.muted, textAlign: 'center', marginTop: space.xs }}>Try another topic to find someone to talk with.</Text></View>}
       ListHeaderComponent={<View>
-        <View style={{ padding: space.md }}>
-          <Text style={type.h1}>Hi {user.name.split(' ')[0]} 👋</Text>
-          <Text style={{ color: colors.muted, marginVertical: space.sm }}>What would feel good to talk through today?</Text>
-          <View style={{ flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.pill, padding: 6, borderWidth: 1, borderColor: colors.line }}>
-            <TextInput style={{ flex: 1, paddingHorizontal: space.md, color: colors.ink }} placeholder="Tell us what’s on your mind..." placeholderTextColor={colors.muted} value={q} onChangeText={setQ} onSubmitEditing={ask} returnKeyType="search" />
-            <Pressable onPress={ask} style={{ backgroundColor: colors.brand, borderRadius: radius.pill, paddingHorizontal: 18, justifyContent: 'center' }}><Text style={{ fontWeight: '700' }}>Explore this feeling</Text></Pressable>
+        <View style={{ padding: space.md, paddingTop: space.lg }}>
+          <Text style={{ ...type.small, color: colors.green, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' }}>A moment for you</Text>
+          <Text style={{ ...type.h1, color: colors.ink, marginTop: space.xs }}>What’s on your mind?</Text>
+          <Text style={{ color: colors.muted, marginTop: space.xs, marginBottom: space.md }}>Find someone who understands what you’re going through.</Text>
+          <View style={{ flexDirection: 'row', backgroundColor: colors.card, borderRadius: 18, padding: 5, borderWidth: 1, borderColor: colors.line }}>
+            <TextInput style={{ flex: 1, minHeight: 44, paddingHorizontal: space.md, color: colors.ink }} placeholder="Try “work has been stressful”" placeholderTextColor={colors.muted} value={q} onChangeText={setQ} onSubmitEditing={ask} returnKeyType="search" />
+            <Pressable accessibilityRole="button" onPress={ask} style={{ backgroundColor: colors.green, borderRadius: 14, paddingHorizontal: 14, justifyContent: 'center' }}><Text style={{ color: '#fff', fontWeight: '700' }}>Find</Text></Pressable>
           </View>
         </View>
         {video && <Explainer key={video.key} data={video} question={video.question} />}
-        <FlatList horizontal data={CATS} keyExtractor={c => c[0]} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.md, gap: space.md, paddingVertical: space.sm }}
+        <FlatList horizontal data={CATS} keyExtractor={c => c[0]} showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.md, gap: space.sm, paddingVertical: space.sm }}
           renderItem={({ item: [c, icon] }) => (
-            <Pressable onPress={() => setCat(c)} style={{ alignItems: 'center', width: 68 }}>
-              <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: colors.category, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: cat === c ? colors.brandDeep : 'transparent' }}><Text style={{ fontSize: 24 }}>{icon}</Text></View>
-              <Text style={{ ...type.small, marginTop: 4 }}>{c}</Text>
-            </Pressable>)} />
-        <View style={{ margin: space.md, padding: space.lg, borderRadius: radius.md, backgroundColor: colors.night }}>
-          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>You don’t have to sort it out alone.</Text>
-          <Text style={{ color: colors.onDarkMuted }}>Find a therapist or life coach to talk through your next step.</Text>
+            <Pressable onPress={() => setCat(c)} style={{ borderRadius: radius.pill, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: cat === c ? colors.green : colors.card, borderWidth: 1, borderColor: cat === c ? colors.green : colors.line, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={{ fontSize: 13 }}>{icon}</Text>
+              <Text style={{ ...type.small, color: cat === c ? '#fff' : colors.ink, fontWeight: '600' }}>{c}</Text>
+            </Pressable>)}/>
+        <Pressable onPress={() => navigation.navigate('Tabs', { screen: 'Mood' })} style={{ marginHorizontal: space.md, marginTop: space.sm, marginBottom: space.lg, padding: space.md, borderRadius: radius.md, backgroundColor: colors.brand, flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFFFFFA8', alignItems: 'center', justifyContent: 'center' }}><Text style={{ fontSize: 19 }}>☀</Text></View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ ...type.h2, color: colors.night }}>Check in with yourself</Text>
+            <Text style={{ ...type.small, color: colors.night, marginTop: 2 }}>A small moment to notice how you feel.</Text>
+          </View>
+          <Text style={{ color: colors.night, fontSize: 20 }}>›</Text>
+        </Pressable>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: space.md, paddingBottom: space.sm }}>
+          <Text style={type.h2}>{video ? `People who understand ${video.topic}` : 'People here to listen'}</Text>
+          <Text style={{ ...type.small, color: colors.muted }}>{shown.length} guides</Text>
         </View>
-        <Text style={{ ...type.h2, paddingHorizontal: space.md, paddingBottom: space.sm }}>{video ? `People who understand ${video.topic}` : 'People here to listen'}</Text>
       </View>}
     />
   );

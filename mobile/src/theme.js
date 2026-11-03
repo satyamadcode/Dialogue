@@ -1,11 +1,20 @@
-// Soft sage surfaces and forest-green accents keep the interface calm and welcoming.
+// Warm ivory surfaces and soft terracotta accents create a brighter, more human feel.
 export const colors = {
-  bg: '#F3F7F1', card: '#FFFFFF', ink: '#26372D', muted: '#6E7D72', line: '#E1E9E0',
-  brand: '#C6DCC4', brandDeep: '#527A5A', green: '#477B55', danger: '#B9534B', night: '#29483A',
-  category: '#E7F0E4', avatarPalette: ['#527A5A', '#62866A', '#3F6B51', '#708F72', '#486C54'],
-  onDarkMuted: '#D0DED2', offline: '#A8844D',
+  bg: '#FFFAF5', card: '#FFFFFF', ink: '#3B302C', muted: '#897970', line: '#F0E5DC',
+  brand: '#F7E5DA', brandDeep: '#A95740', green: '#B5654C', danger: '#B85C50', night: '#493631',
+  category: '#FFF1E8', avatarPalette: ['#A95740', '#B66B50', '#9E6658', '#A47A52', '#895F65'],
+  onDarkMuted: '#E9DCD5', offline: '#C08B59',
+  online: '#71947A', disabled: '#E8DCD4', highlight: '#FFF2E8',
 };
 export const space = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
-export const radius = { md: 14, pill: 999 };
-export const type = { h1: { fontSize: 26, fontWeight: '700' }, h2: { fontSize: 18, fontWeight: '700' }, body: { fontSize: 15 }, small: { fontSize: 13 } };
+export const radius = { sm: 12, md: 16, lg: 24, pill: 999 };
+export const type = {
+  display: { fontSize: 32, fontWeight: '700', letterSpacing: -0.8, lineHeight: 38 },
+  h1: { fontSize: 27, fontWeight: '700', letterSpacing: -0.4, lineHeight: 33 },
+  h2: { fontSize: 17, fontWeight: '700', letterSpacing: -0.15, lineHeight: 23 },
+  body: { fontSize: 15, lineHeight: 22 },
+  small: { fontSize: 12, lineHeight: 17 },
+};
+export const screen = { flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center' };
+export const card = { backgroundColor: colors.card, borderRadius: radius.md, padding: space.md, borderWidth: 1, borderColor: colors.line };
 export const money = c => '$' + (c / 100).toFixed(2);

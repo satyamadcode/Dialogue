@@ -5,7 +5,7 @@ import { colors } from './theme';
 
 export function BrandMark({ size = 42 }) {
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: '#E4EFE3', alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.category, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size * 0.68} height={size * 0.68} viewBox="0 0 32 32">
         <Circle cx="11" cy="10" r="4" fill={colors.brandDeep} />
         <Circle cx="22" cy="10" r="4" fill={colors.green} />

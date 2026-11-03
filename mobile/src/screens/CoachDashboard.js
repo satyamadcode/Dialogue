@@ -3,7 +3,7 @@ import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, screen, space, type } from '../theme';
 
 export default function CoachDashboard() {
   const { user, onMaintenance } = useApp();
@@ -29,7 +29,7 @@ export default function CoachDashboard() {
 
   return (
     <FlatList
-      style={{ backgroundColor: colors.bg }}
+      style={{ ...screen, backgroundColor: colors.bg }}
       contentContainerStyle={{ padding: space.md, gap: space.md, flexGrow: 1 }}
       data={entries}
       keyExtractor={entry => String(entry.id)}

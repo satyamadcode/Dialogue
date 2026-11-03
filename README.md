@@ -22,9 +22,19 @@ Use Node.js 22 or newer for the API.
 For Expo Go, start the API in one terminal and the app in another:
 
     # Expo Go / LAN mode does not require an Expo account.
-    # iOS simulator uses localhost; Android emulator uses 10.0.2.2.
-    # For a real phone, set this to your computer's LAN IP.
-    REACT_NATIVE_PACKAGER_HOSTNAME=192.168.x.x EXPO_PUBLIC_API_URL=http://192.168.x.x:4000 npm start
+    # Keep your phone and computer on the same Wi-Fi; the app uses the Expo
+    # development host to reach the API. Set EXPO_PUBLIC_API_URL to override it.
+    REACT_NATIVE_PACKAGER_HOSTNAME=192.168.x.x npm start
+
+## Deploy the web app
+The mobile app also runs on the web with Expo. Deploy the frontend to Vercel and the API to Render:
+
+1. Import this repository into Render using the included `render.yaml`. The API service uses a persistent disk for SQLite and generates private `JWT_SECRET` and `ADMIN_KEY` values.
+2. In Vercel, import the repository and set the project root directory to `mobile`.
+3. Add `EXPO_PUBLIC_API_URL` to the Vercel project environment variables, using the Render service URL without a trailing slash (for example, `https://dialogue-api.onrender.com`).
+4. Deploy the Vercel project. Its web build is `npm run build` and the exported site is `mobile/dist`.
+
+To embed the deployed app in Notion, publish the Vercel URL and add it to a Notion `/embed` block. Notion embeds the app; it does not host the frontend or API itself.
 
 ## Coach accounts
 Coach accounts are provisioned by an administrator; there are no built-in test credentials. Set a private `ADMIN_KEY` in `backend/.env`, then create an account for a guide using their guide ID, chosen email, and a password of at least 10 characters:

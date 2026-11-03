@@ -1,6 +1,18 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
-const BASE = process.env.EXPO_PUBLIC_API_URL || (Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000');
+import Constants from 'expo-constants';
+
+function getApiBase() {
+  if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL.replace(/\/$/, '');
+  if (Platform.OS === 'web') return 'http://localhost:4000';
+  const hostUri = Constants.expoConfig?.hostUri;
+  const host = hostUri ? new URL(`http://${hostUri}`).hostname : '';
+  const isLanAddress = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+  if (isLanAddress) return `http://${host}:4000`;
+  return Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
+}
+
+const BASE = getApiBase();
 let token = null;
 export const loadToken = async () => {
   token = Platform.OS === 'web' ? localStorage.getItem('token') : await SecureStore.getItemAsync('token');

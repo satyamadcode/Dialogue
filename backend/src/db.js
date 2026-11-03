@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS coach_accounts(
 CREATE TABLE IF NOT EXISTS bookings(
   id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id),
   therapist_id INTEGER NOT NULL REFERENCES therapists(id), slot TEXT NOT NULL,
-  resources TEXT NOT NULL DEFAULT '[]', created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')));
+  resources TEXT NOT NULL DEFAULT '[]', session_type TEXT NOT NULL DEFAULT 'alignment',
+  duration_minutes INTEGER NOT NULL DEFAULT 60, price_cents INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')));
 CREATE TABLE IF NOT EXISTS sessions(
   id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id),
   therapist_id INTEGER NOT NULL REFERENCES therapists(id),
@@ -44,6 +46,11 @@ INSERT OR IGNORE INTO settings VALUES('maintenance','0');
 
 const columns = db.prepare('PRAGMA table_info(therapists)').all().map(column => column.name);
 if (!columns.includes('full_bio')) db.exec("ALTER TABLE therapists ADD COLUMN full_bio TEXT NOT NULL DEFAULT ''");
+
+const bookingColumns = db.prepare('PRAGMA table_info(bookings)').all().map(column => column.name);
+if (!bookingColumns.includes('session_type')) db.exec("ALTER TABLE bookings ADD COLUMN session_type TEXT NOT NULL DEFAULT 'alignment'");
+if (!bookingColumns.includes('duration_minutes')) db.exec('ALTER TABLE bookings ADD COLUMN duration_minutes INTEGER NOT NULL DEFAULT 60');
+if (!bookingColumns.includes('price_cents')) db.exec('ALTER TABLE bookings ADD COLUMN price_cents INTEGER NOT NULL DEFAULT 0');
 
 if (db.prepare('SELECT COUNT(*) c FROM therapists').get().c === 0) {
   const add = db.prepare(`INSERT INTO therapists(name,role,tags,bio,exp_years,rate_cents_per_hr,rating,online,color,slots) VALUES(?,?,?,?,?,?,?,?,?,?)`);

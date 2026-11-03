@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-nativ
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, screen, space, type } from '../theme';
 
 const MOODS = [
   { key: 'great', face: '☀️', label: 'Bright' },
@@ -70,7 +70,7 @@ export default function Mood() {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.md, gap: space.md }}>
+    <ScrollView style={{ ...screen, backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.md, gap: space.md }}>
       <View>
         <Text style={type.h1}>Your mood, your pace</Text>
         <Text style={{ color: colors.muted, marginTop: space.xs }}>A small check-in can help you notice how things are changing.</Text>

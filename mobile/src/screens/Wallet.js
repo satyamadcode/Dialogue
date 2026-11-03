@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
-import { colors, money, radius, space, type } from '../theme';
+import { colors, money, radius, screen, space, type } from '../theme';
 
 export default function Wallet() {
   const { user, setWallet, signOut, onMaintenance } = useApp();
@@ -11,7 +11,11 @@ export default function Wallet() {
     catch (e) { e.maintenance ? onMaintenance() : Alert.alert('Error', e.message); }
   }
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg, padding: space.md, gap: space.md }}>
+    <View style={{ ...screen, backgroundColor: colors.bg, padding: space.md, gap: space.md }}>
+      <View style={{ marginBottom: space.sm }}>
+        <Text style={type.h1}>Your space</Text>
+        <Text style={{ color: colors.muted, marginTop: space.xs }}>Account and conversation balance.</Text>
+      </View>
       <View style={{ backgroundColor: colors.night, borderRadius: radius.md, padding: space.lg }}>
         <Text style={{ color: colors.onDarkMuted }}>Balance</Text>
         <Text style={{ color: '#fff', fontSize: 36, fontWeight: '700' }}>{money(user.wallet_cents)}</Text>

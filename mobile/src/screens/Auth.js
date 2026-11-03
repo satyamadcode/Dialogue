@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
-import { colors, radius, space, type } from '../theme';
+import { colors, radius, screen, space, type } from '../theme';
 import { BrandMark } from '../BrandMark';
 
 export default function Auth({ route }) {
@@ -46,10 +46,11 @@ export default function Auth({ route }) {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ height: 4, backgroundColor: colors.brandDeep }} />
       <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
+        <View style={s.frame}>
         <View style={s.card}>
           <View style={s.brand}><BrandMark size={44} /><Text style={{ ...type.h1, fontSize: 24 }}>Dialogue</Text></View>
           <Text style={s.tagline}>A little more heard. A little less alone.</Text>
-          <View style={s.connection}><Text style={{ color: colors.brandDeep, fontSize: 12, fontWeight: '700' }}>A real person, when you’re ready</Text></View>
+          <View style={s.connection}><Text style={{ color: colors.brandDeep, fontSize: 12, fontWeight: '700' }}>A thoughtful conversation starts here</Text></View>
           <Text style={s.title}>{accountType === 'coach' ? 'Welcome, coach' : mode === 'register' ? 'Start with a conversation' : 'Welcome back'}</Text>
           <Text style={s.subtitle}>{accountType === 'coach' ? 'Sign in to read reflections shared with you.' : 'Find a thoughtful person to talk things through with.'}</Text>
           {accountType === 'client' && mode === 'register' && input('name', 'Your name', { autoCapitalize: 'words', textContentType: 'name' })}
@@ -73,21 +74,23 @@ export default function Auth({ route }) {
             <Text accessibilityRole="link" style={s.secondaryLink}>{accountType === 'client' ? 'Coach sign in' : 'Back to client sign in'}</Text>
           </Pressable>
         </View>
+          </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 const s = {
-  page: { flexGrow: 1, minHeight: '100%', alignItems: 'center', justifyContent: 'center', padding: space.sm + 4 },
-  card: { width: '100%', maxWidth: 380, padding: space.md + 4, borderRadius: 24, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, gap: space.sm + 2, shadowColor: colors.night, shadowOpacity: 0.07, shadowRadius: 20, shadowOffset: { width: 0, height: 8 } },
+  page: { flexGrow: 1, minHeight: '100%', alignItems: 'center', justifyContent: 'center', padding: space.md },
+  frame: { ...screen, maxWidth: 430, justifyContent: 'center' },
+  card: { width: '100%', padding: space.lg, borderRadius: 26, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.line, gap: space.md, shadowColor: colors.night, shadowOpacity: 0.06, shadowRadius: 18, shadowOffset: { width: 0, height: 7 } },
   brand: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
   tagline: { textAlign: 'center', color: colors.muted, fontSize: 13 },
   connection: { alignSelf: 'center', marginVertical: 1, borderWidth: 1, borderColor: colors.line, backgroundColor: '#F6F9F5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill },
   title: { ...type.h2, color: colors.ink, textAlign: 'center', marginTop: 2 },
   subtitle: { ...type.small, color: colors.muted, textAlign: 'center', marginBottom: 2 },
-  input: { backgroundColor: '#FAFCF9', borderWidth: 1, borderColor: colors.line, borderRadius: 14, padding: 12, fontSize: 14, color: colors.ink },
+  input: { backgroundColor: '#FAFCF9', borderWidth: 1, borderColor: colors.line, borderRadius: 14, padding: 14, fontSize: 15, color: colors.ink },
   error: { color: colors.danger, fontSize: 13, textAlign: 'center' },
-  btn: { backgroundColor: colors.green, padding: 12, borderRadius: radius.pill, alignItems: 'center', marginTop: 2 },
+  btn: { backgroundColor: colors.green, padding: 15, borderRadius: radius.pill, alignItems: 'center', marginTop: 2 },
   switchLine: { textAlign: 'center', color: colors.muted, fontSize: 13, marginTop: 1 },
   link: { color: colors.green, fontWeight: '700' },
   secondaryLink: { textAlign: 'center', color: colors.muted, fontSize: 12, textDecorationLine: 'underline', padding: 4 },

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: dialogue-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/status
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_KEY
+        generateValue: true
+      - key: DB_FILE
+        value: /var/data/dialogue.db
+    disk:
+      name: dialogue-data
+      mountPath: /var/data
+      sizeGB: 1

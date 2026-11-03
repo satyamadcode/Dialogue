@@ -22,18 +22,20 @@ import { BrandMark, BrandTitle } from './src/BrandMark';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const headerOpts = { headerStyle: { backgroundColor: colors.bg, borderBottomWidth: 3, borderBottomColor: colors.brandDeep }, headerTintColor: colors.ink, headerTitle: () => <BrandTitle /> };
+const headerOpts = { headerStyle: { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.line }, headerTintColor: colors.ink, headerTitle: () => <BrandTitle /> };
 
 function Tabs() {
   const { user } = React.useContext(AppContext);
   return (
-    <Tab.Navigator screenOptions={{ ...headerOpts, headerLeft: () => <View style={{ marginLeft: space.md }}><BrandMark size={30} /></View>, tabBarActiveTintColor: colors.ink, tabBarInactiveTintColor: colors.muted,
-      headerRight: () => <Text style={{ marginRight: space.md, fontWeight: '700' }}>👛 {money(user.wallet_cents)}</Text> }}>
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: () => <Text>⌂</Text> }} />
-      <Tab.Screen name="Mood" component={MoodScreen} options={{ tabBarIcon: () => <Text>☼</Text> }} />
-      <Tab.Screen name="Reflections" component={ReflectionsScreen} options={{ title: 'Journal', tabBarIcon: () => <Text>♡</Text> }} />
-      <Tab.Screen name="Sessions" component={SessionsScreen} options={{ tabBarIcon: () => <Text>📅</Text> }} />
-      <Tab.Screen name="Wallet" component={WalletScreen} options={{ tabBarIcon: () => <Text>👛</Text> }} />
+    <Tab.Navigator screenOptions={{ ...headerOpts, tabBarActiveTintColor: colors.green, tabBarInactiveTintColor: colors.muted,
+      tabBarStyle: { height: 66, paddingTop: 6, paddingBottom: 8, backgroundColor: colors.card, borderTopColor: colors.line },
+      tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
+      headerRight: () => <Text style={{ marginRight: space.md, color: colors.green, fontWeight: '700' }}>{money(user.wallet_cents)}</Text> }}>
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 19 }}>⌂</Text> }} />
+      <Tab.Screen name="Mood" component={MoodScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>◉</Text> }} />
+      <Tab.Screen name="Reflections" component={ReflectionsScreen} options={{ title: 'Journal', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>♡</Text> }} />
+      <Tab.Screen name="Sessions" component={SessionsScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>◷</Text> }} />
+      <Tab.Screen name="Wallet" component={WalletScreen} options={{ title: 'You', tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 18 }}>○</Text> }} />
     </Tab.Navigator>
   );
 }
