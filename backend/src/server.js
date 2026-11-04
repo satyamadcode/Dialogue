@@ -27,17 +27,17 @@ const validDate = date => {
 
 /* ---- topics (shared by explainer and chat replies) ---- */
 const TOPICS = [
-  { key: 'career', re: /career|job|work|promot|boss|resume|interview|quit|salary/, hue: ['#89A987', '#527A5A'],
+  { key: 'career', re: /career|job|work|promot|boss|resume|interview|quit|salary/, hue: ['#6DB8E1', '#326E9A'],
     scenes: [['💼','Stuck or unsure about your career?'],['🧭','A coach helps you see your strengths'],['🗺️','Together you map realistic next steps'],['🤝','Practise interviews and salary talks'],['🚀','Leave every session with a plan']],
     reply: 'Career questions are easier one step at a time. Which part feels most stuck: the role, the boss or the direction?' },
-  { key: 'stress', re: /stress|anx|worr|overwhelm|panic|burn|sleep|tired|sad|depress/, hue: ['#9CB69A', '#527A67'],
+  { key: 'stress', re: /stress|anx|worr|overwhelm|panic|burn|sleep|tired|sad|depress/, hue: ['#9ADCF4', '#477FA8'],
     scenes: [['🌧️','Feeling anxious or overwhelmed?'],['🫶','A therapist offers a safe, judgement-free space'],['🧠','Learn why your mind reacts this way'],['🌬️','Build simple tools for daily life'],['🌤️','Small steps toward feeling lighter']],
     reply: 'That sounds heavy, and I’m glad you said it. When did you last feel properly rested?' },
-  { key: 'relationships', re: /relation|partner|marri|family|friend|lonely|divorce|breakup|communicat/, hue: ['#A4BCA0', '#66836A'],
+  { key: 'relationships', re: /relation|partner|marri|family|friend|lonely|divorce|breakup|communicat/, hue: ['#F4B47B', '#C8793D'],
     scenes: [['💬','Struggling to connect or communicate?'],['👂','A therapist helps everyone feel heard'],['🔍','Spot patterns that keep repeating'],['🪢','Practise kinder, clearer conversations'],['💞','Rebuild trust at your own pace']],
     reply: 'Relationships hold two people’s stories. Can you tell me about a recent moment that stung?' },
-  { key: 'life', re: /./, hue: ['#B8D2B4', '#6F9A72'],
-    scenes: [['🌱','Not sure what you want from life?'],['✨','A life coach asks the questions you can’t ask yourself'],['🎯','Turn vague wishes into clear goals'],['📅','Build habits that stick'],['🌟','Someone in your corner every week']],
+  { key: 'life', re: /./, hue: ['#79C8E8', '#3C79A3'],
+    scenes: [['🧭','Not sure what you want from life?'],['✨','A life coach asks the questions you can’t ask yourself'],['🎯','Turn vague wishes into clear goals'],['📅','Build habits that stick'],['🌟','Someone in your corner every week']],
     reply: 'Thanks for sharing that. If things were going well a year from now, what would be different?' },
 ];
 const topicFor = q => TOPICS.find(t => t.re.test(String(q).toLowerCase()));
