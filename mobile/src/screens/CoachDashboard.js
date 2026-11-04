@@ -1,11 +1,13 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
+import { Alert, Animated, RefreshControl, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
+import { ScrollMotionProvider, ScrollReveal, useScrollMotion } from '../ScrollMotion';
 import { colors, radius, screen, space, type } from '../theme';
 
 export default function CoachDashboard() {
+  const scrollMotion = useScrollMotion();
   const { user, onMaintenance } = useApp();
   const [entries, setEntries] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -28,17 +30,20 @@ export default function CoachDashboard() {
   }
 
   return (
-    <FlatList
-      style={{ ...screen, backgroundColor: colors.bg }}
+    <ScrollMotionProvider scrollY={scrollMotion.scrollY}>
+    <Animated.FlatList
+      onScroll={scrollMotion.onScroll}
+      scrollEventThrottle={16}
+      style={{ ...screen, backgroundColor: 'transparent' }}
       contentContainerStyle={{ padding: space.md, gap: space.md, flexGrow: 1 }}
       data={entries}
       keyExtractor={entry => String(entry.id)}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
       ListHeaderComponent={
-        <View style={{ marginBottom: space.sm }}>
+        <ScrollReveal><View style={{ marginBottom: space.sm }}>
           <Text style={type.h1}>Hello, {user.name.split(' ')[0]}</Text>
           <Text style={{ color: colors.muted, marginTop: space.xs }}>Reflections clients chose to share with you.</Text>
-        </View>
+        </View></ScrollReveal>
       }
       ListEmptyComponent={
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: space.xl }}>
@@ -48,13 +53,14 @@ export default function CoachDashboard() {
         </View>
       }
       renderItem={({ item }) => (
-        <View style={{ backgroundColor: colors.card, borderRadius: radius.md, padding: space.md, borderWidth: 1, borderColor: colors.line }}>
-          <Text style={{ ...type.small, color: colors.green, fontWeight: '700' }}>{item.client_name} · {item.entry_date}</Text>
+        <ScrollReveal><View style={{ backgroundColor: colors.card, borderRadius: radius.md, padding: space.md, borderWidth: 1, borderColor: colors.line }}>
+          <Text style={{ ...type.small, color: colors.accent, fontWeight: '700' }}>{item.client_name} · {item.entry_date}</Text>
           <Text style={{ ...type.h2, marginTop: space.xs }}>{item.kind === 'gratitude' ? 'Gratitude' : 'Journal reflection'}</Text>
           <Text style={{ color: colors.ink, lineHeight: 22, marginTop: space.sm }}>{item.body}</Text>
           {item.session_id ? <Text style={{ ...type.small, color: colors.muted, marginTop: space.sm }}>Shared after a conversation</Text> : null}
-        </View>
+        </View></ScrollReveal>
       )}
     />
+    </ScrollMotionProvider>
   );
 }

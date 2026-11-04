@@ -1,7 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, AppState, Text, View, Pressable } from 'react-native';
+import { ActivityIndicator, AppState, Image, Text, View, Pressable } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+} from '@expo-google-fonts/inter';
+import {
+  Sora_400Regular,
+  Sora_600SemiBold,
+  Sora_700Bold,
+} from '@expo-google-fonts/sora';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { api, loadToken, setToken } from './src/api';
@@ -17,18 +28,30 @@ import ReflectionsScreen from './src/screens/Reflections';
 import MoodScreen from './src/screens/Mood';
 import CoachDashboard from './src/screens/CoachDashboard';
 import WelcomeScreen from './src/screens/Welcome';
-import { BrandMark, BrandTitle } from './src/BrandMark';
+import { BrandTitle } from './src/BrandMark';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: colors.green,
+    background: colors.bg,
+    card: colors.bg,
+    text: colors.ink,
+    border: colors.line,
+    notification: colors.accent,
+  },
+};
 
-const headerOpts = { headerStyle: { backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.line }, headerTintColor: colors.ink, headerTitle: () => <BrandTitle /> };
+const headerOpts = { headerStyle: { backgroundColor: colors.bg, borderBottomWidth: 1, borderBottomColor: colors.line }, headerTintColor: colors.ink, headerTitle: () => <BrandTitle /> };
 
 function Tabs() {
   const { user } = React.useContext(AppContext);
   return (
     <Tab.Navigator screenOptions={{ ...headerOpts, tabBarActiveTintColor: colors.green, tabBarInactiveTintColor: colors.muted,
-      tabBarStyle: { height: 66, paddingTop: 6, paddingBottom: 8, backgroundColor: colors.card, borderTopColor: colors.line },
+      tabBarStyle: { height: 66, paddingTop: 6, paddingBottom: 8, backgroundColor: colors.bg, borderTopColor: colors.line },
       tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
       headerRight: () => <Text style={{ marginRight: space.md, color: colors.green, fontWeight: '700' }}>{money(user.wallet_cents)}</Text> }}>
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 19 }}>⌂</Text> }} />
@@ -44,20 +67,32 @@ function Maintenance({ retry }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.xl, backgroundColor: colors.night }}>
       <Text style={{ fontSize: 56 }}>⚙️</Text>
-      <Text style={{ ...type.h1, color: '#fff', marginTop: space.md, textAlign: 'center' }}>Dialogue is under maintenance</Text>
+      <Text style={{ ...type.h1, color: colors.ink, marginTop: space.md, textAlign: 'center' }}>Untold is under maintenance</Text>
       <Text style={{ color: colors.onDarkMuted, marginTop: space.sm, textAlign: 'center' }}>We’re improving things and will be back shortly.</Text>
-      <Pressable onPress={retry} style={{ marginTop: space.lg, backgroundColor: colors.brand, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
-        <Text style={{ fontWeight: '700' }}>Try again</Text>
+      <Pressable onPress={retry} style={{ marginTop: space.lg, backgroundColor: colors.brandDeep, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
+        <Text style={{ fontWeight: '700', color: colors.onBrand }}>Try again</Text>
       </Pressable>
     </View>
   );
 }
 
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Sora_400Regular,
+    Sora_600SemiBold,
+    Sora_700Bold,
+  });
   const [boot, setBoot] = useState(true);
   const [maintenance, setMaintenance] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    if (fontError) console.error('Unable to load Untold typefaces; using system fonts.', fontError);
+  }, [fontError]);
 
   const start = useCallback(async () => {
     try {
@@ -88,10 +123,9 @@ export default function App() {
   const signOut = useCallback(async () => { await setToken(null); setUser(null); }, []);
   const ctx = useMemo(() => ({ user, setWallet, onMaintenance, signIn, signOut }), [user, setWallet, onMaintenance, signIn, signOut]);
 
-  if (boot) return (
+  if (boot || (!fontsLoaded && !fontError)) return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg, gap: space.md }}>
-      <BrandMark size={74} />
-      <Text style={{ ...type.h1, fontSize: 32, color: colors.ink }}>Dialogue</Text>
+      <Image source={require('./assets/untold-logo.png')} resizeMode="contain" accessibilityLabel="Untold" style={{ width: 244, height: 74 }} />
       <Text style={{ color: colors.muted }}>A little more heard. A little less alone.</Text>
       <ActivityIndicator color={colors.brandDeep} size="small" />
     </View>
@@ -101,17 +135,17 @@ export default function App() {
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: space.xl, backgroundColor: colors.bg }}>
       <Text style={{ fontSize: 48 }}>🌿</Text>
       <Text style={{ ...type.h1, color: colors.ink, marginTop: space.md, textAlign: 'center' }}>We’re having trouble connecting</Text>
-      <Text style={{ color: colors.muted, marginTop: space.sm, textAlign: 'center' }}>Check your connection and make sure the Dialogue service is running, then try again.</Text>
-      <Pressable onPress={() => { setBoot(true); start(); }} style={{ marginTop: space.lg, backgroundColor: colors.brand, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
-        <Text style={{ fontWeight: '700' }}>Try again</Text>
+      <Text style={{ color: colors.muted, marginTop: space.sm, textAlign: 'center' }}>Check your connection and make sure the Untold service is running, then try again.</Text>
+      <Pressable onPress={() => { setBoot(true); start(); }} style={{ marginTop: space.lg, backgroundColor: colors.brandDeep, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
+        <Text style={{ fontWeight: '700', color: colors.onBrand }}>Try again</Text>
       </Pressable>
     </View>
   );
 
   return (
     <AppContext.Provider value={ctx}>
-      <StatusBar style="dark" />
-      <NavigationContainer>
+      <StatusBar style="light" />
+      <NavigationContainer theme={navigationTheme}>
         <Stack.Navigator screenOptions={headerOpts}>
           {user ? (user.role === 'coach' ? (
             <Stack.Screen name="Coach" component={CoachDashboard} options={{ title: 'Shared reflections', headerRight: () => <Pressable onPress={ctx.signOut} style={{ marginRight: space.md }}><Text style={{ color: colors.green, fontWeight: '700' }}>Sign out</Text></Pressable> }} />

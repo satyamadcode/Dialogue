@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Animated, Pressable, Text, TextInput, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
+import { ScrollMotionProvider, ScrollReveal, useScrollMotion } from '../ScrollMotion';
 import { colors, radius, screen, space, type } from '../theme';
 
 const MOODS = [
@@ -15,6 +16,7 @@ const MOODS = [
 const dateKey = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
 export default function Mood() {
+  const scrollMotion = useScrollMotion();
   const { onMaintenance } = useApp();
   const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [entries, setEntries] = useState({});
@@ -70,12 +72,13 @@ export default function Mood() {
   }
 
   return (
-    <ScrollView style={{ ...screen, backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.md, gap: space.md }}>
-      <View>
+    <ScrollMotionProvider scrollY={scrollMotion.scrollY}>
+    <Animated.ScrollView onScroll={scrollMotion.onScroll} scrollEventThrottle={16} style={{ ...screen, backgroundColor: 'transparent' }} contentContainerStyle={{ padding: space.md, gap: space.md }}>
+      <ScrollReveal><View>
         <Text style={type.h1}>Your mood, your pace</Text>
         <Text style={{ color: colors.muted, marginTop: space.xs }}>A small check-in can help you notice how things are changing.</Text>
-      </View>
-      <View style={card}>
+      </View></ScrollReveal>
+      <ScrollReveal><View style={card}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: space.md }}>
           <Pressable onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><Text style={arrow}>‹</Text></Pressable>
           <Text style={type.h2}>{monthLabel}</Text>
@@ -97,8 +100,8 @@ export default function Mood() {
             );
           })}
         </View>
-      </View>
-      <View style={card}>
+      </View></ScrollReveal>
+      <ScrollReveal><View style={card}>
         <Text style={type.h2}>How are you feeling?</Text>
         <Text style={{ ...type.small, color: colors.muted, marginTop: 3 }}>{selected}</Text>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: space.md }}>
@@ -109,17 +112,18 @@ export default function Mood() {
             </Pressable>
           ))}
         </View>
-        <TextInput multiline value={note} onChangeText={setNote} placeholder="Want to add a little context? (optional)" placeholderTextColor={colors.muted} style={{ minHeight: 72, textAlignVertical: 'top', backgroundColor: '#FAFCF9', borderWidth: 1, borderColor: colors.line, borderRadius: 14, padding: space.md, color: colors.ink, marginTop: space.md }} />
+        <TextInput multiline value={note} onChangeText={setNote} placeholder="Want to add a little context? (optional)" placeholderTextColor={colors.muted} style={{ minHeight: 72, textAlignVertical: 'top', backgroundColor: colors.bg, borderWidth: 1, borderColor: colors.line, borderRadius: 14, padding: space.md, color: colors.ink, marginTop: space.md }} />
         {error ? <Text accessibilityRole="alert" style={{ color: colors.danger, marginTop: space.sm }}>{error}</Text> : null}
-        <Pressable disabled={saving} onPress={save} style={{ marginTop: space.md, padding: 13, borderRadius: radius.pill, alignItems: 'center', backgroundColor: colors.green, opacity: saving ? 0.6 : 1 }}>
-          <Text style={{ color: '#fff', fontWeight: '700' }}>{saving ? 'Saving…' : 'Save check-in'}</Text>
+        <Pressable disabled={saving} onPress={save} style={{ marginTop: space.md, padding: 13, borderRadius: radius.pill, alignItems: 'center', backgroundColor: colors.brandDeep, opacity: saving ? 0.6 : 1 }}>
+          <Text style={{ color: colors.onBrand, fontWeight: '700' }}>{saving ? 'Saving…' : 'Save check-in'}</Text>
         </Pressable>
-      </View>
-    </ScrollView>
+      </View></ScrollReveal>
+    </Animated.ScrollView>
+    </ScrollMotionProvider>
   );
 }
 
 const card = { backgroundColor: colors.card, borderRadius: radius.md, padding: space.md, borderWidth: 1, borderColor: colors.line };
 const dayCell = { width: '14.285%', minHeight: 46, borderWidth: 1, borderColor: 'transparent', borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 2 };
 const weekday = { width: '14.285%', textAlign: 'center', color: colors.muted, fontSize: 12, fontWeight: '700', paddingBottom: 8 };
-const arrow = { color: colors.green, fontSize: 28, paddingHorizontal: 8 };
+const arrow = { color: colors.accent, fontSize: 28, paddingHorizontal: 8 };

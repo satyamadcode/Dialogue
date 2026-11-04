@@ -1,17 +1,21 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Image, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { colors } from './theme';
 
 export function BrandMark({ size = 42 }) {
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.category, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={size * 0.68} height={size * 0.68} viewBox="0 0 32 32">
-        <Circle cx="11" cy="10" r="4" fill={colors.brandDeep} />
-        <Circle cx="22" cy="10" r="4" fill={colors.green} />
-        <Path d="M3.5 26c.5-5.3 3.2-8 7.5-8s7 2.7 7.5 8" fill={colors.brandDeep} />
-        <Path d="M13.5 26c.5-5.3 3.2-8 7.5-8s7 2.7 7.5 8" fill={colors.green} />
-        <Path d="M13 14h6m-2-2 2 2-2 2" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <View style={{
+      width: size, height: size, borderRadius: size * 0.34, backgroundColor: colors.brandDeep,
+      alignItems: 'center', justifyContent: 'center',
+      shadowColor: colors.brandDeep, shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 3,
+    }}>
+      <Svg width={size * 0.82} height={size * 0.82} viewBox="0 0 44 44">
+        <Path d="M9 10a6 6 0 0 1 6-6h11a6 6 0 0 1 6 6v3a6 6 0 0 1-6 6h-4l-5 4v-4h-2a6 6 0 0 1-6-6z" fill={colors.accent} />
+        <Path d="M7 23a6 6 0 0 1 6-6h16a6 6 0 0 1 6 6v6a6 6 0 0 1-6 6h-7l-6 5v-5h-3a6 6 0 0 1-6-6z" fill="#FFFFFF" />
+        <Circle cx="17" cy="26" r="1.3" fill={colors.brandDeep} />
+        <Circle cx="22" cy="26" r="1.3" fill={colors.brandDeep} />
+        <Circle cx="27" cy="26" r="1.3" fill={colors.brandDeep} />
       </Svg>
     </View>
   );
@@ -19,9 +23,11 @@ export function BrandMark({ size = 42 }) {
 
 export function BrandTitle() {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
-      <BrandMark size={30} />
-      <Text style={{ color: colors.ink, fontSize: 17, fontWeight: '800', letterSpacing: 0.2 }}>Dialogue</Text>
-    </View>
+    <Image
+      source={require('../assets/untold-logo.png')}
+      resizeMode="contain"
+      accessibilityLabel="Untold"
+      style={{ width: 132, height: 34 }}
+    />
   );
 }

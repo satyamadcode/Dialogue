@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import { Alert, Animated, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { api } from '../api';
 import { useApp } from '../AppContext';
+import { ScrollMotionProvider, ScrollReveal, useScrollMotion } from '../ScrollMotion';
 import { colors, money, radius, screen, space, type } from '../theme';
 
 const RESOURCES = ['Intake questionnaire', 'Goal-setting worksheet', 'Session recording', 'Follow-up action plan'];
@@ -53,14 +54,15 @@ function DateOption({ item, available, selected, onPress }) {
         opacity: available ? (pressed ? 0.78 : 1) : 0.44,
       })}
     >
-      <Text style={{ ...type.small, color: selected ? '#fff' : colors.muted, fontWeight: '600' }}>{item.weekday}</Text>
-      <Text style={{ fontSize: 21, lineHeight: 27, color: selected ? '#fff' : colors.ink, fontWeight: '700', marginVertical: 2 }}>{item.number}</Text>
-      <Text style={{ ...type.small, color: selected ? '#FFF1E9' : colors.muted }}>{item.month}</Text>
+      <Text style={{ ...type.small, color: selected ? colors.onBrand : colors.muted, fontWeight: '600' }}>{item.weekday}</Text>
+      <Text style={{ fontSize: 21, lineHeight: 27, color: selected ? colors.onBrand : colors.ink, fontWeight: '700', marginVertical: 2 }}>{item.number}</Text>
+      <Text style={{ ...type.small, color: selected ? '#092012' : colors.muted }}>{item.month}</Text>
     </Pressable>
   );
 }
 
 export default function Guide({ route, navigation }) {
+  const scrollMotion = useScrollMotion();
   const { id, name } = route.params;
   const { onMaintenance } = useApp();
   const [therapist, setTherapist] = useState(null);
@@ -130,29 +132,43 @@ export default function Guide({ route, navigation }) {
   if (!therapist) return <View style={{ ...screen, flex: 1, backgroundColor: colors.bg }} />;
 
   const selectedDateItem = dates.find(date => date.date === selectedDate);
-  const sessionPrice = Math.ceil(therapist.rate_cents_per_hr * service.duration / 60);
+  const coachFirstName = therapist.name.replace(/^Dr\.\s*/, '').split(' ')[0];
   const canBook = Boolean(selectedDate && selectedTime && !booking);
 
   return (
-    <View style={{ ...screen, flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView
+    <ScrollMotionProvider scrollY={scrollMotion.scrollY}>
+    <View style={{ ...screen, flex: 1, backgroundColor: 'transparent' }}>
+      <Animated.ScrollView
+        onScroll={scrollMotion.onScroll}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 28, paddingBottom: 142, gap: 26 }}
       >
-        <View style={{ paddingHorizontal: 2 }}>
+        <ScrollReveal>
+        <View style={{
+          position: 'relative', overflow: 'hidden', backgroundColor: colors.brand,
+          borderRadius: 26, padding: 22, minHeight: 194, justifyContent: 'center',
+        }}>
+          <Animated.View style={{ position: 'absolute', width: 148, height: 148, borderRadius: 74, right: -40, top: 24, backgroundColor: colors.green, opacity: 0.18, transform: [{ translateY: scrollMotion.scrollY.interpolate({ inputRange: [0, 500], outputRange: [0, -28], extrapolate: 'clamp' }) }] }} />
+          <Animated.View style={{ position: 'absolute', width: 94, height: 94, borderRadius: 47, right: -10, top: 51, backgroundColor: colors.accent, opacity: 0.22, alignItems: 'center', justifyContent: 'center', transform: [{ translateY: scrollMotion.scrollY.interpolate({ inputRange: [0, 500], outputRange: [0, -16], extrapolate: 'clamp' }) }] }}>
+            <Text style={{ color: colors.onBrand, fontSize: 43, lineHeight: 52 }}>✳</Text>
+          </Animated.View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.green }} />
-            <Text style={{ ...type.small, color: colors.brandDeep, fontWeight: '700', letterSpacing: 1.35, textTransform: 'uppercase' }}>A moment for you</Text>
+            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.accent }} />
+            <Text style={{ ...type.small, color: '#FFE0BC', fontWeight: '700', letterSpacing: 1.35, textTransform: 'uppercase' }}>A moment for you</Text>
           </View>
-          <Text style={{ fontFamily: Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 'serif', fontSize: 36, lineHeight: 43, color: colors.ink, marginTop: 10, letterSpacing: -0.5 }}>A little time for a brighter you.</Text>
-          <Text style={{ ...type.body, color: colors.muted, marginTop: 8, lineHeight: 24 }}>Thoughtful support, at a pace that feels right.</Text>
+          <Text style={{ maxWidth: '78%', fontFamily: 'serif', fontSize: 34, lineHeight: 39, color: '#FFFCFA', marginTop: 12, letterSpacing: -0.55 }}>Make space for you.</Text>
+          <Text style={{ maxWidth: '74%', ...type.body, color: '#DDF5E4', marginTop: 9, lineHeight: 23 }}>Thoughtful support, at a pace that feels right.</Text>
+          <Text style={{ color: '#FFE0BC', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginTop: 18 }}>YOUR NEXT CHAPTER STARTS HERE  ↗</Text>
         </View>
+        </ScrollReveal>
 
+        <ScrollReveal>
         <View style={{
           flexDirection: 'row', alignItems: 'center', gap: space.md,
-          padding: 18, backgroundColor: colors.card, borderRadius: 20,
+          padding: 18, backgroundColor: colors.category, borderRadius: 22,
           borderWidth: 1, borderColor: colors.line,
-          shadowColor: '#A66B53', shadowOpacity: 0.07, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 2,
+          shadowColor: colors.night, shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 2,
         }}>
           <View style={{
             width: 62, height: 62, borderRadius: 31, backgroundColor: colors.avatarPalette[therapist.id % colors.avatarPalette.length],
@@ -164,16 +180,17 @@ export default function Guide({ route, navigation }) {
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 18, lineHeight: 24, color: colors.ink, fontWeight: '700' }}>{therapist.name}</Text>
             <Text style={{ ...type.small, color: colors.muted, marginTop: 4 }}>{therapist.role} · {therapist.exp_years} years of experience</Text>
-            <Text style={{ ...type.small, color: colors.brandDeep, fontWeight: '700', marginTop: 7 }}>★ {therapist.rating}  ·  {therapist.online ? 'Here when you’re ready' : 'Currently in a session'}</Text>
+            <Text style={{ ...type.small, color: colors.accent, fontWeight: '700', marginTop: 7 }}>★ {therapist.rating}  ·  {therapist.online ? 'Here when you’re ready' : 'Currently in a session'}</Text>
           </View>
         </View>
+        </ScrollReveal>
 
-        <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.line }}>
-          <Text style={{ ...type.h2, color: colors.ink, fontFamily: Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 'serif', fontSize: 20 }}>A little about {therapist.name.split(' ')[0]}</Text>
+        <ScrollReveal><View style={{ backgroundColor: colors.card, borderRadius: 22, padding: 20, borderWidth: 1, borderColor: colors.line }}>
+          <Text style={{ ...type.h2, color: colors.ink, fontFamily: 'serif', fontSize: 20 }}>A little about {coachFirstName}</Text>
           <Text style={{ ...type.body, color: colors.muted, marginTop: 9, lineHeight: 24 }}>{therapist.full_bio || therapist.bio}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
             {therapist.tags.split(',').map(tag => (
-              <Text key={tag} style={{ ...type.small, color: colors.brandDeep, backgroundColor: colors.category, paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.pill, fontWeight: '600' }}>
+              <Text key={tag} style={{ ...type.small, color: colors.accent, backgroundColor: colors.category, paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.pill, fontWeight: '600' }}>
                 ·  {tag.trim()}
               </Text>
             ))}
@@ -185,18 +202,18 @@ export default function Guide({ route, navigation }) {
             style={({ pressed }) => ({
               marginTop: space.md, minHeight: 46, justifyContent: 'center', alignItems: 'center',
               borderRadius: radius.pill, backgroundColor: therapist.online ? colors.highlight : colors.line,
-              borderWidth: 1, borderColor: therapist.online ? '#EED4C5' : colors.line,
+              borderWidth: 1, borderColor: therapist.online ? colors.accent : colors.line,
               opacity: pressed ? 0.8 : 1,
             })}
           >
-            <Text style={{ color: therapist.online ? colors.brandDeep : colors.muted, fontWeight: '700' }}>
+            <Text style={{ color: therapist.online ? colors.accent : colors.muted, fontWeight: '700' }}>
               {therapist.online ? 'Start a conversation' : 'Currently in a session'}
             </Text>
           </Pressable>
-        </View>
+        </View></ScrollReveal>
 
-        <View>
-          <Text style={{ ...type.h2, color: colors.ink, fontFamily: Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 'serif', fontSize: 22, marginBottom: 14 }}>Choose your session</Text>
+        <ScrollReveal><View>
+          <Text style={{ ...type.h2, color: colors.ink, fontFamily: 'serif', fontSize: 22, marginBottom: 14 }}>Choose your session</Text>
           <View style={{ gap: 12 }}>
             {SERVICES.map(item => {
               const active = service.id === item.id;
@@ -209,32 +226,32 @@ export default function Guide({ route, navigation }) {
                   onPress={() => setService(item)}
                   style={({ pressed }) => ({
                     padding: 18, borderRadius: 20, borderWidth: active ? 1.5 : 1,
-                    borderColor: active ? '#D89B83' : colors.line,
+                    borderColor: active ? colors.accent : colors.line,
                     backgroundColor: active ? colors.highlight : colors.card, opacity: pressed ? 0.84 : 1,
                   })}
                 >
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: space.sm }}>
                     <View style={{ flex: 1 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
-                        <View style={{ width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: active ? colors.brandDeep : '#D8C9BF', alignItems: 'center', justifyContent: 'center' }}>
-                          {active && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.green }} />}
+                        <View style={{ width: 18, height: 18, borderRadius: 9, borderWidth: 1.5,                         borderColor: active ? colors.brandDeep : colors.line, alignItems: 'center', justifyContent: 'center' }}>
+                          {active && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent }} />}
                         </View>
                         <Text style={{ ...type.h2, color: colors.ink, flex: 1 }}>{item.name}</Text>
                       </View>
                       <Text style={{ ...type.small, color: colors.muted, marginTop: 8, marginLeft: 27, lineHeight: 19 }}>{item.duration} minutes  ·  {item.detail}</Text>
                     </View>
-                    <Text style={{ color: colors.brandDeep, fontSize: 16, fontWeight: '700' }}>{money(price)}</Text>
+                    <Text style={{ color: colors.accent, fontSize: 16, fontWeight: '700' }}>{money(price)}</Text>
                   </View>
-                  {active && <Text style={{ ...type.small, color: colors.brandDeep, fontWeight: '600', marginTop: 12, marginLeft: 27 }}>Selected  ·  session rate, no charge at booking</Text>}
+                  {active && <Text style={{ ...type.small, color: colors.accent, fontWeight: '600', marginTop: 12, marginLeft: 27 }}>Selected  ·  session rate, no charge at booking</Text>}
                 </Pressable>
               );
             })}
           </View>
-        </View>
+        </View></ScrollReveal>
 
-        <View>
+        <ScrollReveal><View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: space.sm }}>
-            <Text style={{ ...type.h2, color: colors.ink, fontFamily: Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 'serif', fontSize: 22 }}>Choose a day</Text>
+            <Text style={{ ...type.h2, color: colors.ink, fontFamily: 'serif', fontSize: 22 }}>Choose a day</Text>
             <Text style={{ ...type.small, color: colors.muted }}>NEXT 2 WEEKS</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.xs, paddingVertical: 2 }}>
@@ -249,24 +266,24 @@ export default function Guide({ route, navigation }) {
             ))}
           </ScrollView>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: space.sm }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.green }} />
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent }} />
             <Text style={{ ...type.small, color: colors.muted }}>Available</Text>
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.line, marginLeft: space.sm }} />
             <Text style={{ ...type.small, color: colors.muted }}>Unavailable</Text>
           </View>
-        </View>
+        </View></ScrollReveal>
 
-        <View style={{
+        <ScrollReveal><View style={{
           backgroundColor: colors.card, borderRadius: 20, padding: 20,
           borderWidth: 1, borderColor: colors.line,
         }}>
-          <Text style={{ ...type.h2, color: colors.ink, fontFamily: Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 'serif', fontSize: 22 }}>Choose a time</Text>
+          <Text style={{ ...type.h2, color: colors.ink, fontFamily: 'serif', fontSize: 22 }}>Choose a time</Text>
           <Text style={{ ...type.small, color: colors.muted, marginTop: 6 }}>
             {selectedDateItem ? `${selectedDateItem.weekday}, ${selectedDateItem.month} ${selectedDateItem.number}` : 'Select an available day to see times'}
           </Text>
           {groupedTimes.length ? groupedTimes.map(group => (
             <View key={group.title} style={{ marginTop: space.md }}>
-              <Text style={{ ...type.small, color: colors.brandDeep, fontWeight: '700', letterSpacing: 0.2, marginBottom: 10 }}>{group.icon}  {group.title}</Text>
+              <Text style={{ ...type.small, color: colors.accent, fontWeight: '700', letterSpacing: 0.2, marginBottom: 10 }}>{group.icon}  {group.title}</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                 {group.times.map(time => {
                   const active = selectedTime === time;
@@ -283,7 +300,7 @@ export default function Guide({ route, navigation }) {
                         backgroundColor: active ? colors.brandDeep : colors.card, opacity: pressed ? 0.8 : 1,
                       })}
                     >
-                      <Text style={{ color: active ? '#fff' : colors.ink, fontSize: 14, fontWeight: '600' }}>{formatTime(time)}</Text>
+                      <Text style={{ color: active ? colors.onBrand : colors.ink, fontSize: 14, fontWeight: '600' }}>{formatTime(time)}</Text>
                     </Pressable>
                   );
                 })}
@@ -294,10 +311,10 @@ export default function Guide({ route, navigation }) {
               {selectedDate ? 'No times are available on this day. Choose another date.' : 'Choose a highlighted day to see available times.'}
             </Text>
           )}
-        </View>
+        </View></ScrollReveal>
 
-        <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.line }}>
-          <Text style={{ ...type.h2, color: colors.ink, fontFamily: Platform.OS === 'web' ? 'Georgia, "Times New Roman", serif' : 'serif', fontSize: 22 }}>A little preparation</Text>
+        <ScrollReveal><View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.line }}>
+          <Text style={{ ...type.h2, color: colors.ink, fontFamily: 'serif', fontSize: 22 }}>A little preparation</Text>
           <Text style={{ ...type.small, color: colors.muted, marginTop: 6, marginBottom: 12, lineHeight: 19 }}>Choose anything you’d like to share before you meet.</Text>
           {RESOURCES.map((resource, index) => (
             <View key={resource} style={{
@@ -305,24 +322,24 @@ export default function Guide({ route, navigation }) {
               paddingVertical: 12, borderTopWidth: index ? 1 : 0, borderColor: colors.line,
             }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 11, flex: 1, paddingRight: space.sm }}>
-                <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.brand }} />
+                <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.accent }} />
                 <Text style={{ ...type.body, color: colors.ink, flex: 1 }}>{resource}</Text>
               </View>
               <Switch
                 accessibilityLabel={`Share ${resource}`}
                 value={resources.includes(resource)}
                 onValueChange={() => toggleResource(resource)}
-                trackColor={{ false: '#E8DED7', true: colors.brandDeep }}
+                trackColor={{ false: colors.line, true: colors.brandDeep }}
                 thumbColor="#FFFFFF"
               />
             </View>
           ))}
-        </View>
-      </ScrollView>
+        </View></ScrollReveal>
+      </Animated.ScrollView>
 
       <View style={{
         position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingTop: 13, paddingBottom: 18,
-        backgroundColor: 'rgba(255,250,245,0.98)', borderTopWidth: 1, borderTopColor: colors.line,
+        backgroundColor: 'rgba(8,11,9,0.98)', borderTopWidth: 1, borderTopColor: colors.line,
       }}>
         <Pressable
           accessibilityRole="button"
@@ -336,7 +353,7 @@ export default function Guide({ route, navigation }) {
             shadowColor: colors.brandDeep, shadowOpacity: canBook ? 0.16 : 0, shadowRadius: 15, shadowOffset: { width: 0, height: 6 }, elevation: 3,
           })}
         >
-          <Text style={{ color: '#fff', fontSize: 15, fontWeight: '700', letterSpacing: 0.2 }}>
+          <Text style={{ color: canBook ? colors.onBrand : colors.ink, fontSize: 15, fontWeight: '700', letterSpacing: 0.2 }}>
             {booking ? 'Confirming your session…' : 'Confirm my session'}
           </Text>
         </Pressable>
@@ -345,5 +362,6 @@ export default function Guide({ route, navigation }) {
         </Text>
       </View>
     </View>
+    </ScrollMotionProvider>
   );
 }

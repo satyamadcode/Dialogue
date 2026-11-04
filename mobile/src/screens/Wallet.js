@@ -18,13 +18,13 @@ export default function Wallet() {
       </View>
       <View style={{ backgroundColor: colors.night, borderRadius: radius.md, padding: space.lg }}>
         <Text style={{ color: colors.onDarkMuted }}>Balance</Text>
-        <Text style={{ color: '#fff', fontSize: 36, fontWeight: '700' }}>{money(user.wallet_cents)}</Text>
+        <Text style={{ color: colors.ink, fontSize: 36, fontFamily: 'Sora_700Bold', fontWeight: '700' }}>{money(user.wallet_cents)}</Text>
         <Text style={{ color: colors.onDarkMuted, marginTop: space.xs }}>{user.name} · {user.email}</Text>
       </View>
       <Text style={type.h2}>Add money (demo)</Text>
       <View style={{ flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' }}>
         {[10, 25, 50, 100].map(a => (
-          <Pressable key={a} onPress={() => topup(a)} style={{ backgroundColor: colors.brand, paddingVertical: 12, paddingHorizontal: 22, borderRadius: radius.pill }}><Text style={{ fontWeight: '700' }}>+ ${a}</Text></Pressable>))}
+          <Pressable key={a} onPress={() => topup(a)} style={{ backgroundColor: colors.category, paddingVertical: 12, paddingHorizontal: 22, borderRadius: radius.pill }}><Text style={{ color: colors.accent, fontWeight: '700' }}>+ ${a}</Text></Pressable>))}
       </View>
       <Pressable onPress={signOut} style={{ marginTop: 'auto', padding: 14, alignItems: 'center' }}><Text style={{ color: colors.danger, fontWeight: '600' }}>Sign out</Text></Pressable>
     </View>
